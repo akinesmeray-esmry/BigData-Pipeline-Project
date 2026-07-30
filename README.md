@@ -73,6 +73,29 @@ From a business perspective, the driving incentive for creating data pipelines i
 
 STUDY:
 - Is data clean? Explain what clean data means? any duplicate entities in it? if so de-duplicate.
+<<<<<<< HEAD
+  - **Answer:** Clean data is reliable, type-casted, deduplicated data. `olist_geolocation_dataset` had ~1M rows for ~19k zip codes (~52.6x duplicate factor) and was deduplicated by taking average lat/lng per zip code prefix. Duplicate reviews were kept at their latest timestamp per `order_id`. Canceled/unavailable orders were excluded from core metrics.
+- Based on given input data above, what should our output look like to reply the business questions below? Reason about it.
+  - **Answer:** Output must be structured as a Star Schema with explicit Fact and Dimension tables. To prevent row fan-out (duplication caused by 1:N relations), we split metrics into an item-level fact table (`fact_order_items`) and an order-level fact table (`fact_orders`).
+- ETL or ELT approach you adopted to transform the data, why? Learn more about dbt and explain.
+  - **Answer:** We adopted **ELT**. Raw CSVs are loaded untouched into SQL Server staging tables (`stg_*`) first. Transformations are handled inside the database via SQL. **dbt** acts as the Transformation framework orchestrating Staging (Bronze) -> Intermediate (Silver) -> Marts (Gold) layers.
+- Explain the layers and / or the logic in your architecture.
+  - **Answer:** 1. Data Source Layer (Raw CSVs) -> 2. ETL/ELT Ingestion (`scripts/load_raw_to_sql.py`) -> 3. DWH Layer (Star Schema tables in `sql/01_create_star_schema.sql`) -> 4. End User Layer (`sql/02_business_questions.sql`).
+- Create star schema(s), explain fact & dimension tables and how they can respond the questions
+  - **Answer:** Created `fact_order_items` (monetary/sales metrics) and `fact_orders` (delivery/review metrics), along with `dim_customers`, `dim_products`, `dim_sellers`, and `dim_date`.
+- Python / sql or both you can use, up to you:
+
+
+| Business Question | Fact Table | Dimensions |
+|---|---|---|
+| Monthly revenue | `fact_order_items` | `dim_date` *(Degenerate Dim in `fact_order_items`)* |
+| Revenue by product category | `fact_order_items` | `dim_products` |
+| Top-performing sellers | `fact_order_items` | `dim_sellers` |
+| Sales by customer state | `fact_order_items` | `dim_customers` |
+| Average delivery time by state | `fact_orders` | `dim_customers` |
+| Payment method trends | `fact_orders` | N/A *(Degenerate Dim within `fact_orders`)* |
+| Average review score by category | `fact_order_items` | `dim_products` *(Joined with `fact_orders` on `order_id`* |
+=======
 - Based on given input data above, what should our output look like to reply the business questions below? Reason about it.
 - ETL or ELT approach you adopted to transform the data, why? Learn more about dbt and explain.
 - Explain the layers and / or the logic in your architecture.
@@ -90,6 +113,7 @@ STUDY:
 | Average delivery time by state | | |
 | Payment method trends | | |
 | Average review score by category | | |
+>>>>>>> upstream/master
 
 ---
 
